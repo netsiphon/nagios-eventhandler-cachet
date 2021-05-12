@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-if ($argc != 6) {
+if ($argc != 7) {
 	echo 'Usage: ' . basename(__FILE__) . ' cachet_component service_name service_state service_state_type service_output' . "\n";
 	exit(1);
 }
@@ -18,6 +18,7 @@ $service_name = $argv[2];
 $service_status = $argv[3];
 $service_status_type = $argv[4];
 $service_output = $argv[5];
+$service_downtime = $argv[6];
 
 define('CACHET_STATUS_INVESTIGATING', 1);
 define('CACHET_STATUS_IDENTIFIED', 2);
@@ -63,6 +64,11 @@ function cachet_query($api_part, $action = 'GET', $data = null) {
 	return array('code' => $http_code, 'body' => json_decode($http_body));
 }
 
+/* Check for downtime and don't continue if so */
+if ($service_downtime != '0') {
+        echo 'Parent service is running in scheduled downtime ' . $service_downtime . '. Exit!' . "\n";
+        exit(1);
+}
 /* Find Cachet component ID */
 $result = cachet_query('components');
 if ($result['code'] != 200) {
